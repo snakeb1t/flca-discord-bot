@@ -34,7 +34,7 @@ resource "aws_lambda_function" "example" {
   filename      = data.archive_file.example.output_path
   function_name = "flca_discord"
   role          = aws_iam_role.flca_lambda.arn
-  handler       = "lambda_handler"
+  handler       = "discord.lambda_handler"
   code_sha256   = data.archive_file.example.output_base64sha256
 
   runtime = "python3.14"
