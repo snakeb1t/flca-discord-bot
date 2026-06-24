@@ -19,3 +19,10 @@ variable "ships_table_id" {
 	sensitive = true
 	ephemeral = true
 }
+
+variable "discord_bot_public_key" {
+	type = string
+	description = "discord bot public key"
+	sensitive = true
+	ephemeral = true
+}
