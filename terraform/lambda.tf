@@ -17,7 +17,7 @@ resource "aws_iam_role" "flca_lambda" {
 }
 
 # Package the Lambda function code
-data "archive_file" "example" {
+data "archive_file" "payload" {
   type        = "zip"
   source_dir = "${path.module}/../python/dist"
   output_path = "${path.module}/lambda/function.zip"
@@ -30,12 +30,12 @@ pip install \
     pynacl
 
 # Lambda function
-resource "aws_lambda_function" "example" {
-  filename      = data.archive_file.example.output_path
+resource "aws_lambda_function" "flca" {
+  filename      = data.archive_file.payload.output_path
   function_name = "flca_discord"
   role          = aws_iam_role.flca_lambda.arn
   handler       = "discord.lambda_handler"
-  code_sha256   = data.archive_file.example.output_base64sha256
+  code_sha256   = data.archive_file.payload.output_base64sha256
 
   runtime = "python3.14"
 
@@ -58,3 +58,12 @@ resource "aws_lambda_function" "example" {
   }
 }
 
+resource "aws_lambda_function_url" "flca" {
+  function_name      = aws_lambda_function.flca.function_name
+  authorization_type = "NONE"
+}
+
+output "lambda_url" {
+  description = "lambda url"
+  value = aws_lambda_function_url.flca.function_url
+}
