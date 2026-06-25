@@ -93,15 +93,15 @@ resource "aws_lambda_function" "flca" {
   role          = aws_iam_role.flca_lambda.arn
   handler       = "discord.lambda_handler"
   code_sha256   = data.archive_file.function_payload.output_base64sha256
-  
+
   layers = [aws_lambda_layer_version.flca.arn]
   
   runtime = "python3.14"
 
-  vpc_config {
-    subnet_ids                  = [aws_subnet.public.id]
-    security_group_ids = [aws_security_group.allow_https.id]
-  }
+  #vpc_config {
+  #  subnet_ids                  = [aws_subnet.public.id]
+  #  security_group_ids = [aws_security_group.allow_https.id]
+  #}
 
   environment {
     variables = {
