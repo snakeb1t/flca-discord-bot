@@ -1,5 +1,4 @@
 import requests
-from dotenv import load_dotenv
 import os
 
 # decorator that caches the return value of a method so it's not recalculated each time it's called
@@ -25,10 +24,11 @@ class Ships:
         }
     @lazyproperty
     def get(self):
-        resp = requests.get(url=self.uri,headers=self.headers)
+        resp = requests.get(url=self.uri,headers=self.headers,timeout=2)
         return resp.json()["list"]
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
     load_dotenv()
 
     token = os.getenv("NOCODB_TOKEN")
@@ -36,5 +36,8 @@ if __name__ == "__main__":
     domain = os.getenv("NOCODB_DOMAIN")
 
     ships = Ships(domain=domain,token=token,tableId=tableId)
+    ship_data = []
     for ship in ships.get:
-        print(ship["Name"])
+        ship_data.append(f"Name: {ship['Name']} Status: {ship['ShipStatus']} Location: {ship['Current Location']['LocationID'] if ship['Current Location'] != None else "Unknown"} Tonnage: {ship['Tonnage']} Volume: {ship['Volume']}")
+    content = "\n".join(ship_data)
+    print(content)
