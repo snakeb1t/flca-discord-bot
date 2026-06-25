@@ -11,6 +11,21 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
+resource "aws_iam_role_policy_attachment" "basic_execution" {
+  role       = aws_iam_role.flca_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "vpc_access" {
+  role       = aws_iam_role.flca_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_role" {
+  role       = aws_iam_role.flca_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaRole"
+}
+
 resource "aws_iam_role" "flca_lambda" {
   name               = "lambda_execution_role"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
