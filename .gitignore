@@ -1,10 +1,11 @@
 python/.env
+python/guild_list
 python/.venv
 python/__pycache__
 terraform/terraform.tfvars
 terraform/.terraform.lock.hcl
 terraform/.terraform/
-terraform/terraform.tfstate
+terraform/terraform.tfstate*
 python/dist/*
 !python/dist/.empty
 terraform/lambda/*

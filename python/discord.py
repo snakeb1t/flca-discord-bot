@@ -2,6 +2,7 @@ import json
 import os
 from nacl.signing import VerifyKey
 from nacl.exceptions import BadSignatureError
+import ships
 
 token = os.getenv("NOCODB_TOKEN")
 tableId = os.getenv("SHIPS_TABLE_ID")
@@ -29,22 +30,42 @@ def lambda_handler(event, context):
     if interaction_type == 1:
         return {
             'statusCode': 200,
-            'body': json.dumps({'type': 1}) # PONG
+            'body': json.dumps({'type': 1})
         }
 
     if interaction_type == 2:
         command_name = data['data']['name']
-        
-        if command_name == 'test':
-            return {
-                'statusCode': 200,
-                'headers': {'Content-Type': 'application/json'},
-                'body': json.dumps({
-                    'type': 4, # Respond immediately with a message
-                    'data': {
-                        'content': 'Hello from AWS Lambda! 🚀'
-                    }
-                })
-            }
+
+        match command_name:
+            case 'ships':
+                ship_data = []
+                g_ships = ships.Ships(domain=domain,token=token,tableId=tableId)
+                for ship in g_ships.get:
+                    ship_data.append({
+                        'name': ship['Name'],
+                        'value': f"**Status**: {ship['ShipStatus']} **Location**: {ship['Current Location']['LocationID'] if ship['Current Location'] != None else "Unknown"} **Tonnage**: {ship['Tonnage']} **Volume**: {ship['Volume']}",
+                        'inline': False
+                    })
+                embed = {
+                    "fields": ship_data
+                }
+                embeds = [embed]
+                content = "**Ships**"
+                ret = {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json'},
+                    'body': json.dumps({
+                        'type': 4,
+                        'data': {
+                            'content': content,
+                            'embeds': embeds,
+                            'flags': 64
+                        }
+                    })
+                }
+                print(ret)
+                return ret
+            case _:
+                return {'statusCode': 400, 'body': 'Unknown command'}
 
     return {'statusCode': 400, 'body': 'Unknown interaction'}
