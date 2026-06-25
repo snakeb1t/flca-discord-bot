@@ -16,11 +16,25 @@ resource "aws_iam_role" "flca_lambda" {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
-# Package the Lambda function code
-data "archive_file" "payload" {
+data "archive_file" "function_payload" {
+  type = "zip"
+  source_file = "${path.root}/../python/discord.py"
+  output_path = "${path.root}/lambda/function.zip"
+}
+
+data "archive_file" "layer_payload" {
   type        = "zip"
-  source_dir = "${path.module}/../python/dist"
-  output_path = "${path.module}/lambda/function.zip"
+  source_dir = "${path.root}/../python/dist"
+  output_path = "${path.root}/lambda/layer.zip"
+}
+
+resource "aws_lambda_layer_version" "flca" {
+  filename   = data.archive_file.layer_payload.output_path
+  layer_name = "discord_layer"
+
+  source_code_hash = data.archive_file.layer_payload.output_base64sha256
+
+  compatible_runtimes = ["python3.14"]
 }
 
 pip install \
@@ -29,14 +43,15 @@ pip install \
     --only-binary=:all: \
     pynacl
 
-# Lambda function
 resource "aws_lambda_function" "flca" {
-  filename      = data.archive_file.payload.output_path
+  filename      = data.archive_file.function_payload.output_path
   function_name = "flca_discord"
   role          = aws_iam_role.flca_lambda.arn
   handler       = "discord.lambda_handler"
-  code_sha256   = data.archive_file.payload.output_base64sha256
-
+  code_sha256   = data.archive_file.function_payload.output_base64sha256
+  
+  layers = [aws_lambda_layer_version.flca.arn]
+  
   runtime = "python3.14"
 
   vpc_config {
