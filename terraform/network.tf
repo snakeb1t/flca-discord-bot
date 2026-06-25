@@ -7,7 +7,7 @@ resource "aws_vpc" "flca" {
 }
 
 resource "aws_subnet" "public" {
-  vpc_id                  = aws_vpc.main.id
+  vpc_id                  = aws_vpc.flca.id
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
@@ -16,7 +16,7 @@ resource "aws_subnet" "public" {
 }
 
 resource "aws_subnet" "private" {
-  vpc_id            = aws_vpc.main.id
+  vpc_id            = aws_vpc.flca.id
   cidr_block        = "10.0.10.0/24"
   availability_zone = "us-east-1a"
 
@@ -24,13 +24,13 @@ resource "aws_subnet" "private" {
 }
 
 resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.main.id
+  vpc_id = aws_vpc.flca.id
 
   tags = { Name = "flca-igw" }
 }
 
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
+  vpc_id = aws_vpc.flca.id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -46,7 +46,7 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.main.id
+  vpc_id = aws_vpc.flca.id
 
   route {
     cidr_block     = "10.0.0.0/16"

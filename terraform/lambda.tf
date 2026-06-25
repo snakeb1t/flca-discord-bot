@@ -52,11 +52,40 @@ resource "aws_lambda_layer_version" "flca" {
   compatible_runtimes = ["python3.14"]
 }
 
-pip install \
-    --platform manylinux2014_x86_64 \
-    --target ./package \
-    --only-binary=:all: \
-    pynacl
+resource "aws_security_group" "allow_https" {
+
+  name = "allow_https"
+  description = "allow https from everywhere"
+  vpc_id = aws_vpc.flca.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_tls_ipv4" {
+  security_group_id = aws_security_group.allow_https.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 443
+  ip_protocol       = "tcp"
+  to_port           = 443
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_tls_ipv6" {
+  security_group_id = aws_security_group.allow_https.id
+  cidr_ipv6         = "::/0"
+  from_port         = 443
+  ip_protocol       = "tcp"
+  to_port           = 443
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
+  security_group_id = aws_security_group.allow_https.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv6" {
+  security_group_id = aws_security_group.allow_https.id
+  cidr_ipv6         = "::/0"
+  ip_protocol       = "-1"
+}
 
 resource "aws_lambda_function" "flca" {
   filename      = data.archive_file.function_payload.output_path
@@ -71,6 +100,7 @@ resource "aws_lambda_function" "flca" {
 
   vpc_config {
     subnet_ids                  = [aws_subnet.public.id]
+    security_group_ids = [aws_security_group.allow_https.id]
   }
 
   environment {
