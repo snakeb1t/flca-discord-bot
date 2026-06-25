@@ -98,11 +98,11 @@ resource "aws_lambda_function" "flca" {
   
   runtime = "python3.14"
 
-  #vpc_config {
-  #  subnet_ids                  = [aws_subnet.public.id]
-  #  security_group_ids = [aws_security_group.allow_https.id]
-  #  ipv6_allowed_for_dual_stack = true
-  #}
+  vpc_config {
+    subnet_ids                  = [aws_subnet.public.id]
+    security_group_ids = [aws_security_group.allow_https.id]
+    ipv6_allowed_for_dual_stack = true
+  }
 
   environment {
     variables = {
