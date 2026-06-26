@@ -1,5 +1,6 @@
 import requests
 import os
+import json
 
 # decorator that caches the return value of a method so it's not recalculated each time it's called
 class lazyproperty:
@@ -41,3 +42,4 @@ if __name__ == "__main__":
         ship_data.append(f"Name: {ship['Name']} Status: {ship['ShipStatus']} Location: {ship['Current Location']['LocationID'] if ship['Current Location'] != None else "Unknown"} Tonnage: {ship['Tonnage']} Volume: {ship['Volume']}")
     content = "\n".join(ship_data)
     print(content)
+    print(json.dumps(ships.get,indent=4))

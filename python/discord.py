@@ -63,7 +63,6 @@ def lambda_handler(event, context):
                         }
                     })
                 }
-                print(ret)
                 return ret
             case _:
                 return {'statusCode': 400, 'body': 'Unknown command'}
